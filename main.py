@@ -37,13 +37,20 @@ class Spot:
         return v_exit
 
     def get_spot(self):
-        return self.vehicle.get_vehicle(), self.occupied
+        if self.vehicle is None:
+            return None, self.occupied
+        else:
+            return self.vehicle.get_vehicle(), self.occupied
 
 
 def main():
     test_spot = Spot()
 
     test_spot.add_vehicle(Vehicle("car", 12345))
+
+    print(test_spot.get_spot())
+
+    test_spot.remove_vehicle()
 
     print(test_spot.get_spot())
 
