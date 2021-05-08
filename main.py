@@ -1,6 +1,9 @@
 # Parking Lot Project - Andrew Ragland
-import time
+import time, os
 
+spaces = []
+avail_spaces = 8
+total_spaces = 8
 
 class Vehicle:
     def __init__(self, v_type, plate):
@@ -26,8 +29,8 @@ class Spot:
         self.vehicle = None
         self.occupied = False
 
-    def add_vehicle(self, v_type, plate):
-        self.vehicle = Vehicle(v_type, plate)
+    def add_vehicle(self, vehicle):
+        self.vehicle = vehicle
         self.occupied = True
 
     def remove_vehicle(self):
@@ -43,37 +46,56 @@ class Spot:
         return self.occupied
 
 
-def display_spaces(spaces, avail):
-    output = "SPOTS AVAILABLE: " + str(avail) + "\n"
+def display_spaces():
+    global spaces
+    global avail_spaces
+    output = "SPOTS AVAILABLE: " + str(avail_spaces) + "\n"
     output += "|-------------------------------|\n"
     output += "|"
-    for i in range(len(spaces)):
-        if not spaces[i].occupied:
+    for space in spaces:
+        if not space.occupied:
             output += "[ ]"
         else:
             output += "["
-            output += "c" if spaces[i].vehicle_info().get_type() == "car" \
-                else "t" if spaces[i].vehicle_info().get_type() == "truck" else "m"
+            output += "c" if space.vehicle_info().get_type() == 1 \
+                else "t" if space.vehicle_info().get_type() == 2 \
+                else "m"
             output += "]"
-        if i < len(spaces) - 1:
+        if spaces.index(space) < len(spaces) - 1:
             output += " "
     output += "|\n"
     output += "|-------------------------------|\n"
 
+    # os.system("clear")
     print(output)
 
 
-def remove_vehicle(spaces, plate):
-    removed = None
+# FUNCTIONS FOR PARKING A VEHICLE #
+def enter_vehicle(v_type, plate):
+    global spaces, avail_spaces
+
+    for uniq in spaces:
+        if uniq.occupied:
+            if uniq.vehicle_info().get_plate() == plate:
+                display_spaces()
+                print("Error: Vehicle Already In Lot")
+                time.sleep(2)
+                return
+
     for space in spaces:
-        if space.vehicle_info().get_plate() == plate:
-            removed = space.remove_vehicle()
+        if not space.occupied:
+            new_vehicle = Vehicle(v_type, plate)
+            space.add_vehicle(new_vehicle)
+            avail_spaces -= 1
+            display_spaces()
+            print("Vehicle Added to Lot!\n"
+                  "Time Entered: " + str(time.strftime('%I:%M %p',
+                                                       time.localtime(new_vehicle.get_entry_time()))))
+            time.sleep(2)
             break
-            # redundant
 
-            # calculate fare
-    fare_calculation(removed)
 
+# FUNCTIONS FOR EXITING THE LOT #
 def fare_calculation(vehicle):
     total_time = time.time() - vehicle.get_entry_time()
     rate = 0.0
@@ -84,39 +106,78 @@ def fare_calculation(vehicle):
     else:
         rate = total_time * 2.50
 
-    print("Your Total for " + "{:.2f}".format(total_time) + " hours is $" + "{:.2f}".format(rate))
+    ret = "Your Total for " + "{:.2f}".format(total_time) + " hours is $" + "{:.2f}".format(rate)
+
+    return ret
+
+
+def exit_lot(plate):
+    global spaces, avail_spaces
+    removed = None
+    for space in spaces:
+        if space.occupied:
+            if space.vehicle_info().get_plate() == plate:
+                removed = space.remove_vehicle()
+                avail_spaces += 1
+                break
+
+    # calculate fare
+    print(fare_calculation(removed))
+    time.sleep(2)
+
+
+# HANDLING USER COMMANDS #
+def command_handler(command):
+    if command == "P":
+        display_spaces()
+        new_type = int(input("Enter Vehicle Type:\n"
+                             "1. Car\n"
+                             "2. Truck\n"
+                             "3. Motorcycle\n"
+                             ">"))
+        display_spaces()
+        new_plate = input("Enter New Vehicle Plate Number:\n"
+                          ">")
+        enter_vehicle(new_type, new_plate)
+
+    elif command == "E":
+        display_spaces()
+        exit_plate = input("Enter Vehicle Plate Number:\n"
+                           ">")
+        display_spaces()
+        exit_lot(exit_plate)
+
+    elif command == "R":
+        display_spaces()
+        input("Current Parking Rates:\n"
+              "Cars - $3.50/hour\n"
+              "Trucks - $4.50/hour\n"
+              "Motorcycles - $2.00/hour\n"
+              "\nPress Enter to return to menu")
+    elif command == "quit":
+        return
+    else:
+        display_spaces()
+        print("Error: Invalid Command")
+        time.sleep(1)
 
 
 def main():
-    # generate 8 spots
-    spaces = []
-    avail_spaces = 8
-    total_spaces = 8
+    global spaces, avail_spaces
+
     for i in range(8):
         spaces.append(Spot())
 
-    # add vehicles based on availability
-    # search the lot, fill empty spaces, allow only unique plate numbers
-    for k in range(3):
-        if not spaces[k].occupied:
-            spaces[k].add_vehicle("car", "aaa-bbbb")
-            avail_spaces -= 1
-        elif spaces[k].vehicle_info().get_plate() == "aaa-bbbb":
-            break
+    command = ""
+    while command != "quit":
+        display_spaces()
+        print("Please Select An Option:\n"
+              "P - Park a Vehicle\n"
+              "E - Exit the Lot\n"
+              "R - Display Vehicle Rates\n")
 
-    for k in range(5):
-        if not spaces[k].occupied:
-            spaces[k].add_vehicle("truck", "aaa-cccc")
-            avail_spaces -= 1
-        elif spaces[k].vehicle_info().get_plate() == "aaa-cccc":
-            break
-
-    time.sleep(5)
-
-    remove_vehicle(spaces, "aaa-bbbb")
-    avail_spaces += 1
-
-    display_spaces(spaces, avail_spaces)
+        command = input(">")
+        command_handler(command)
 
 
 if __name__ == '__main__':
