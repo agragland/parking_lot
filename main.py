@@ -66,6 +66,7 @@ def display_spaces():
     output += "|\n"
     output += "|-------------------------------|\n"
 
+    # only uncomment when running on linux machine
     # os.system("clear")
     print(output)
 
