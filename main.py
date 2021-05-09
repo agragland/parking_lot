@@ -2,8 +2,9 @@
 import time, os
 
 spaces = []
-avail_spaces = 8
-total_spaces = 8
+avail_spaces = 0
+total_spaces = 0
+rows = 0
 
 class Vehicle:
     def __init__(self, v_type, plate):
@@ -47,24 +48,39 @@ class Spot:
 
 
 def display_spaces():
-    global spaces
-    global avail_spaces
+    global spaces, avail_spaces, total_spaces, rows
+
+    # calculate the number of spaces within a row
+    space_count = int(total_spaces/rows)
+
+    # generate the interface border
+    border = "|"
+    for i in range(space_count-1):
+            for j in range(4):
+                border += "-"
+    border += "---|\n"
+
+    # generate the interface
     output = "SPOTS AVAILABLE: " + str(avail_spaces) + "\n"
-    output += "|-------------------------------|\n"
-    output += "|"
-    for space in spaces:
-        if not space.occupied:
-            output += "[ ]"
-        else:
-            output += "["
-            output += "c" if space.vehicle_info().get_type() == 1 \
-                else "t" if space.vehicle_info().get_type() == 2 \
-                else "m"
-            output += "]"
-        if spaces.index(space) < len(spaces) - 1:
-            output += " "
-    output += "|\n"
-    output += "|-------------------------------|\n"
+
+    output += border
+
+    for row in range(rows):
+        output += "|"
+        for s in range(space_count*row, space_count*(row+1)):
+            if not spaces[s].occupied:
+                output += "[ ]"
+            else:
+                output += "["
+                output += "c" if spaces[s].vehicle_info().get_type() == 1 \
+                    else "t" if spaces[s].vehicle_info().get_type() == 2 \
+                    else "m"
+                output += "]"
+            if s < space_count*(row+1)-1:
+                output += " "
+        output += "|\n"
+
+    output += border
 
     # only uncomment when running on linux machine
     # os.system("clear")
@@ -163,10 +179,30 @@ def command_handler(command):
         time.sleep(1)
 
 
+def read_config():
+    global total_spaces, avail_spaces, rows
+    config = open('config.txt','r')
+    while True:
+        line = config.readline()
+        if line.find("total_spaces") != -1:
+            total_spaces = int(line[13:16])
+            avail_spaces = total_spaces
+        elif line.find("rows") != -1:
+            rows = int(line[5:7])
+        elif line.find("demo_mode") != -1:
+            if int(line[10:11]) == 1:
+                break
+            else:
+                break
+    config.close()
+
+
 def main():
     global spaces, avail_spaces
 
-    for i in range(8):
+    read_config()
+
+    for i in range(total_spaces):
         spaces.append(Spot())
 
     command = ""

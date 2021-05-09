@@ -1,0 +1,7 @@
+# config file for parking lot system
+
+total_spaces=20
+rows=4
+demo_mode=1
+
+# demo mode information
