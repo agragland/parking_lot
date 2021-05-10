@@ -126,7 +126,7 @@ The config.txt file allows the changing of the total number of spaces within the
 
 The total_spaces value can support up to 3 digits, the rows value can supprt up to 2 digits.
 
-The linux and demo_mode flags can be either 0 or 1, their usages are specifed above.
+The linux and demo_mode flags can be either 0 or 1, their usages are defined above.
 
 
 ## Postmortem
