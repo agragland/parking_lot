@@ -121,6 +121,11 @@ After downloading and extracting the files to a directory, the program can be ex
 
 To enable the static interface feature, set the "linux" flag within config.txt to 1. The same command to execute can be used. 
 
+### Config
+The config.txt file allows the changing of the total number of spaces within the lot as well as the number of rows.
+The total_spaces value can support up to 3 digits, the rows value can supprt up to 2 digits.
+The linux and demo_mode flags can be either 0 or 1, their usages are specifed above.
+
 
 ## Postmortem
 This project was used to practice Python as well as my project design and management skills.
